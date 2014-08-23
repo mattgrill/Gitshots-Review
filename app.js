@@ -1,10 +1,16 @@
 var express         = require('express'),
     app             = express(),
     bodyParser      = require('body-parser'),
+    path            = require('path'),
     mysql           = require('mysql'),
     connection      = mysql.createConnection(process.env.CLEARDB_DATABASE_URL);
 
 app.use(bodyParser.json());
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
 connection.connect();
 
 app.post('/', function(req, res){
@@ -13,6 +19,17 @@ app.post('/', function(req, res){
   });
 });
 
+app.get('/', function(req, res){
+  var rows  = [],
+      query = connection.query('SELECT file_name from _img_values');
+  query
+    .on('result', function(row) {
+      rows.push(row);
+    })
+    .on('end', function() {
+      res.render('index', { mysqldata : rows} );
+    });
+});
 
-app.listen(process.env.PORT || 5000);
-console.log('Listening on :' + process.env.PORT || '5000');
+
+app.listen(process.env.PORT);

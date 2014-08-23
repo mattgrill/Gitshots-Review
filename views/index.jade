@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Images from Git Commits
+  each item in mysqldata
+    div.image
+      img(src="http://drupo.co/images/gifs/#{item.file_name}")
