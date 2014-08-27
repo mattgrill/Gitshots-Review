@@ -80,7 +80,7 @@ app.post('/:table', function (req, res){
         });
       }
       else {
-        res.status(403).send(promptColors.RED2+'Sorry, bro. Wrong key.' + promptColors.RESET + ' \n');
+        res.status(403).send(promptColors.red+'Sorry, bro. Wrong key.' + promptColors.RESET + ' \n');
       }
     }
   });
