@@ -28,15 +28,15 @@ app.post('/register', function (req, res){
     res.status(403).send('Sorry, bro.');
   }
   else {
-    var result  = [],
-        query   = pool.query('SHOW TABLES LIKE "' + req.body.table + '"');
-
-    query
-      .on('result', function (row){
-        result.push(row);
-      })
-      .on('end', function (){
-        if (result.length === 0){
+    pool.query({sql : 'SHOW TABLES LIKE "' + req.body.table + '"', timeout : 60000}, function (err, rows){
+      if (err && err.code === 'PROTOCOL_SEQUENCE_TIMEOUT') {
+        res.status(504).send(promptColors.red+'Sorry, MYSQL timed out. '+promptColors.RESET+' \n');
+      }
+      if (err) {
+        res.status(500).send(promptColors.red+'Sorry, MYSQL did something else? ' + err.code + ' ' + promptColors.RESET + ' \n');
+      }
+      else {
+        if (rows.length === 0){
           var key = uuid.v4();
           pool
             .query({sql : 'CREATE TABLE `' + req.body.table + '` (`id` int(255) unsigned NOT NULL AUTO_INCREMENT, `date` varchar(10) NOT NULL DEFAULT "", `file_name` varchar(255) NOT NULL DEFAULT "", PRIMARY KEY (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;', timeout : 60000}, function (err, rows){
@@ -56,7 +56,8 @@ app.post('/register', function (req, res){
         else {
           res.status(403).send(promptColors.red+'Sorry. The table, ' + req.body.table + ', already exists.'+promptColors.RESET+' \n');
         }
-      });
+      }
+    });
   }
 });
 
